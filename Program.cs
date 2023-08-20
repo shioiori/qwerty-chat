@@ -1,10 +1,19 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using qwerty_chat_api.Hubs;
 using qwerty_chat_api.Models;
+using qwerty_chat_api.Repositories;
+using qwerty_chat_api.Repositories.Interface;
 using qwerty_chat_api.Services;
+using qwerty_chat_api.Services.Interface;
 using System.Text;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 // Add services to the container.
 
@@ -13,11 +22,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.Configure<ChatDatabaseSettings>(builder.Configuration.GetSection("QwertyChatDB"));
 builder.Services.AddSingleton<ChatsService>();
 builder.Services.AddSingleton<MessagesService>();
 builder.Services.AddSingleton<UsersService>();
+
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IUser, UsersService>();
+builder.Services.AddScoped<IMessage, MessagesService>();
+builder.Services.AddScoped<IChat, ChatsService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -34,6 +52,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     };
                 });
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins,
+                          policy =>
+                          {
+                              policy.WithOrigins("*")
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod();
+                          });
+});
+
+builder.Services.AddSignalR();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -46,10 +77,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+app.MapHub<ChatHub>("/chat-hub");
 
 app.Run();

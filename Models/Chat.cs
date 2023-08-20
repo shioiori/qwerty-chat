@@ -2,6 +2,8 @@
 using MongoDB.Bson;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AutoMapper.Execution;
+using MongoDB.Driver;
 
 namespace qwerty_chat_api.Models
 {
@@ -11,7 +13,7 @@ namespace qwerty_chat_api.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         [BsonElement("name")]
-        public string? Name { get; set; }
+        public string? Name { get; set; } = "default";
         [BsonElement("created_date")]
         public DateTime? CreatedDate { get; set; }
         [BsonElement("updated_date")]
@@ -25,8 +27,12 @@ namespace qwerty_chat_api.Models
         [BsonElement("is_limited")]
         public bool? IsLimited { get; set; } = true;
         [BsonElement("member_ids")]
-        public IEnumerable<User> MemberIds { get; set; }
+        public IEnumerable<string> MemberIds { get; set; }
         [BsonElement("message_ids")]
-        public IEnumerable<Message> MessageIds { get; set; }
+        public IEnumerable<string> MessageIds { get; set; }
+        [BsonElement("members")]
+        public IEnumerable<User> Members { get; set; }
+        [BsonElement("messages")]
+        public IEnumerable<Message> Messages { get; set; }
     }
 }

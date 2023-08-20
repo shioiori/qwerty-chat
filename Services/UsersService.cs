@@ -1,42 +1,43 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using qwerty_chat_api.Models;
+using qwerty_chat_api.Repositories.Interface;
+using qwerty_chat_api.Services.Interface;
 
 namespace qwerty_chat_api.Services
 {
-    public class UsersService
+    public class UsersService : IUser
     {
-        private readonly IMongoCollection<User> _UsersCollection;
+        private readonly IUserRepository _userRepository;
 
-        public UsersService(
-            IOptions<ChatDatabaseSettings> ChatDatabaseSettings)
+        public UsersService(IUserRepository userRepository)
         {
-            var mongoClient = new MongoClient(
-                ChatDatabaseSettings.Value.ConnectionString);
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                ChatDatabaseSettings.Value.DatabaseName);
-
-            _UsersCollection = mongoDatabase.GetCollection<User>(
-                ChatDatabaseSettings.Value.UsersCollectionName);
+            _userRepository = userRepository;
         }
 
-        public async Task<List<User>> GetAsync() =>
-            await _UsersCollection.Find(_ => true).ToListAsync();
+        public async Task CreateAsync(User obj)
+        {
+           await _userRepository.CreateAsync(obj);
+        }
 
-        public async Task<User?> GetAsync(string id) =>
-            await _UsersCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+        public Task<List<User>> GetAllAsync()
+        {
+            return _userRepository.GetAllAsync();
+        }
 
-        public async Task<User?> GetAsync(string username, string password) =>
-            await _UsersCollection.Find(x => x.Username == username && x.Password == password).FirstOrDefaultAsync();
+        public Task<User> GetAsync(string id)
+        {
+            return _userRepository.GetAsync(id);
+        }
 
-        public async Task CreateAsync(User newUser) =>
-            await _UsersCollection.InsertOneAsync(newUser);
+        public Task RemoveAsync(string id)
+        {
+            return _userRepository.RemoveAsync(id);
+        }
 
-        public async Task UpdateAsync(string id, User updatedUser) =>
-            await _UsersCollection.ReplaceOneAsync(x => x.Id == id, updatedUser);
-
-        public async Task RemoveAsync(string id) =>
-            await _UsersCollection.DeleteOneAsync(x => x.Id == id);
+        public async Task UpdateAsync(string id, User obj)
+        {
+            await _userRepository.UpdateAsync(id, obj);
+        }
     }
 }

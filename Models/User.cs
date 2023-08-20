@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace qwerty_chat_api.Models
 {
-    public class User : MongoIdentityUser<string>
+    public class User
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

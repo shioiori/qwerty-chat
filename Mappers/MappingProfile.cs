@@ -8,7 +8,8 @@ namespace qwerty_chat_api.Mappers
     {
         public MappingProfile() 
         {
-            CreateMap<LogRequest, User>();
+            CreateMap<LoginRequest, User>();
+            CreateMap<RegisterRequest, User>();
         }
     }
 }

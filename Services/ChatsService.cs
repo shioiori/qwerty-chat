@@ -1,44 +1,52 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using qwerty_chat_api.Models;
+using qwerty_chat_api.Repositories.Interface;
+using qwerty_chat_api.Services.Interface;
 
 namespace qwerty_chat_api.Services
 {
-    public class ChatsService
+    public class ChatsService : IChat
     {
-        private readonly IMongoCollection<Chat> _ChatsCollection;
+        private readonly IChatRepository _chatRepository;
 
-        public ChatsService(
-            IOptions<ChatDatabaseSettings> ChatDatabaseSettings)
+        public ChatsService(IChatRepository chatRepository)
         {
-            var mongoClient = new MongoClient(
-                ChatDatabaseSettings.Value.ConnectionString);
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                ChatDatabaseSettings.Value.DatabaseName);
-
-            _ChatsCollection = mongoDatabase.GetCollection<Chat>(
-                ChatDatabaseSettings.Value.ChatsCollectionName);
+            _chatRepository = chatRepository;
         }
 
-        public async Task<List<Chat>> GetAsync() =>
-            await _ChatsCollection.Find(_ => true).ToListAsync();
+        public async Task CreateAsync(Chat obj)
+        {
+            await _chatRepository.CreateAsync(obj);
+        }
 
-        public async Task<Chat?> GetAsync(string id) =>
-            await _ChatsCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+        public Task<List<Chat>> GetAllAsync()
+        {
+            return _chatRepository.GetAllAsync();
+        }
 
-        public async Task<List<Chat>> GetByUserIdAsync(string id) =>
-            await _ChatsCollection.Find(x => x.Id == id).ToListAsync();
+        public Task<Chat> GetAsync(string id)
+        {
+            return _chatRepository.GetAsync(id);
+        }
 
-        public async Task CreateAsync(Chat newChat) =>
-            await _ChatsCollection.InsertOneAsync(newChat);
+        public async Task RemoveAsync(string id)
+        {
+            await _chatRepository.RemoveAsync(id);
+        }
 
-        public async Task UpdateAsync(string id, Chat updatedChat) =>
-            await _ChatsCollection.ReplaceOneAsync(x => x.Id == id, updatedChat);
+        public async Task StoredChat(string id)
+        {
+            var chat = await _chatRepository.GetAsync(id);
+            chat.IsStored = true;
+            await _chatRepository.UpdateAsync(id, chat);
+        }
 
-        public async Task RemoveAsync(string id) =>
-            await _ChatsCollection.DeleteOneAsync(x => x.Id == id);
-
+        public async Task UpdateAsync(string id, Chat obj)
+        {
+            await _chatRepository.UpdateAsync(id, obj);
+        }
     }
 }

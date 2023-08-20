@@ -1,39 +1,50 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using qwerty_chat_api.Models;
+using qwerty_chat_api.Repositories.Interface;
+using qwerty_chat_api.Services.Interface;
 
 namespace qwerty_chat_api.Services
 {
-    public class MessagesService
+    public class MessagesService : IMessage
     {
-        private readonly IMongoCollection<Message> _MessagesCollection;
+        private readonly IMessageRepository _messageRepository;
 
-        public MessagesService(
-            IOptions<ChatDatabaseSettings> ChatDatabaseSettings)
+        public MessagesService(IMessageRepository messageRepository)
         {
-            var mongoClient = new MongoClient(
-                ChatDatabaseSettings.Value.ConnectionString);
-
-            var mongoDatabase = mongoClient.GetDatabase(
-                ChatDatabaseSettings.Value.DatabaseName);
-
-            _MessagesCollection = mongoDatabase.GetCollection<Message>(
-                ChatDatabaseSettings.Value.MessagesCollectionName);
+            _messageRepository = messageRepository;
         }
 
-        public async Task<List<Message>> GetAsync() =>
-            await _MessagesCollection.Find(_ => true).ToListAsync();
+        public async Task CreateAsync(Message obj)
+        {
+            await _messageRepository.CreateAsync(obj);
+        }
 
-        public async Task<Message?> GetAsync(string id) =>
-            await _MessagesCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+        public Task<List<Message>> GetAllAsync()
+        {
+            return _messageRepository.GetAllAsync();
+        }
 
-        public async Task CreateAsync(Message newMessage) =>
-            await _MessagesCollection.InsertOneAsync(newMessage);
+        public Task<Message> GetAsync(string id)
+        {
+            return _messageRepository.GetAsync(id);
+        }
 
-        public async Task UpdateAsync(string id, Message updatedMessage) =>
-            await _MessagesCollection.ReplaceOneAsync(x => x.Id == id, updatedMessage);
+        public async Task RemoveAsync(string id)
+        {
+            await _messageRepository.RemoveAsync(id);
+        }
 
-        public async Task RemoveAsync(string id) =>
-            await _MessagesCollection.DeleteOneAsync(x => x.Id == id);
+        public async Task StoredMessage(string id)
+        {
+            var message = await GetAsync(id);
+            message.IsStored = true;
+            await _messageRepository.UpdateAsync(id, message);
+        }
+
+        public async Task UpdateAsync(string id, Message obj)
+        {
+            await _messageRepository.UpdateAsync(id, obj);
+        }
     }
 }

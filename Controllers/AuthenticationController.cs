@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using qwerty_chat_api.DTOs;
 using qwerty_chat_api.Models;
-using qwerty_chat_api.Services;
+using qwerty_chat_api.Services.Interface;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
@@ -12,15 +14,15 @@ using System.Text;
 
 namespace qwerty_chat_api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/authentication")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly UsersService _usersService;
+        private readonly IUser _usersService;
         private IConfiguration _config;
         private readonly IMapper _mapper;
 
-        public AuthenticationController(IConfiguration config, IMapper mapper, UsersService usersService) 
+        public AuthenticationController(IConfiguration config, IMapper mapper, IUser usersService) 
         { 
             _config = config;
             _mapper = mapper;
@@ -29,7 +31,7 @@ namespace qwerty_chat_api.Controllers
 
         [HttpPost]
         [Route("/login")]
-        public async Task<IActionResult> Login(LogRequest logRequest)
+        public async Task<IActionResult> Login([FromBody] LoginRequest logRequest)
         {
             var res = await Authenticate(logRequest);
             return res.Success ? Ok(res) : BadRequest(res);
@@ -38,11 +40,28 @@ namespace qwerty_chat_api.Controllers
 
         [HttpPost]
         [Route("/register")]
-        public async Task<IActionResult> Register(LogRequest logRequest)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest logRequest)
         {
             try
             {
-                await _usersService.CreateAsync(_mapper.Map<LogRequest, User>(logRequest));
+                if (await _usersService.GetUsernameValidatedAsync(logRequest.Username) != null)
+                {
+                    return BadRequest(new LogResponse()
+                    {
+                        Success = false,
+                        Message = "Username đã có người sử dụng",
+                    });
+                }
+                if (await _usersService.GetEmailValidatedAsync(logRequest.Email) != null)
+                {
+
+                    return BadRequest(new LogResponse()
+                    {
+                        Success = false,
+                        Message = "Email đã có người sử dụng",
+                    });
+                }
+                await _usersService.CreateAsync(_mapper.Map<RegisterRequest, User>(logRequest));
                 return Ok();
             }
             catch (Exception ex)
@@ -52,9 +71,9 @@ namespace qwerty_chat_api.Controllers
         }
         
 
-        private async Task<LogResponse> Authenticate(LogRequest logRequest)
+        private async Task<LogResponse> Authenticate(LoginRequest logRequest)
         {
-            var user = await _usersService.GetAsync(logRequest.Username, logRequest.Password);
+            var user = await _usersService.GetUserAuthenticatedAsync(logRequest.Username, logRequest.Password);
 
             if (user == null)
             {
@@ -64,10 +83,12 @@ namespace qwerty_chat_api.Controllers
                     AccessToken = "Invalid username or password",
                 };
             }
+
             return new LogResponse()
             {
                 Success = true,
                 AccessToken = GenerateJWTToken(user),
+                UserId = user.Id
             };
         }
 
@@ -82,7 +103,7 @@ namespace qwerty_chat_api.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username)
-            };
+            }; 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Issuer"],

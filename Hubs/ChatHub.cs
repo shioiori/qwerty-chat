@@ -1,22 +1,28 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using qwerty_chat_api.Models;
-using qwerty_chat_api.Utilities;
-using qwerty_chat_api.ViewModels;
+using qwerty_chat_api.Services.Interface;
 using System.Data;
+using System.Security.Claims;
 
 namespace qwerty_chat_api.Hubs
 {
     public class ChatHub : Hub
     {
-        private readonly DataContext _dataContext;
+        private static Dictionary<string, string> UserConnections = new Dictionary<string, string>();
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMessage _messageService;
 
-        public ChatHub(DataContext dataContext)
+        public ChatHub(IHttpContextAccessor httpContextAccessor, IMessage messageService)
         {
-            _dataContext = dataContext;
+            _httpContextAccessor = httpContextAccessor;
+            _messageService = messageService;
         }
+
+        public override Task OnConnectedAsync()
+        {
+            return base.OnConnectedAsync();
+        }
+
 
         public async Task SendAll(string message)
         {
@@ -25,48 +31,14 @@ namespace qwerty_chat_api.Hubs
 
         public async Task SendSpecifiedUser(string sender, string receiver, string message)
         {
-            var _sender = Cryptography.Decrypt(sender);
-            var _receiver = Cryptography.Decrypt(receiver);
-            var user = _dataContext.Users.Where(x => x.UserId == Guid.Parse(_receiver)).FirstOrDefault();
-            var vm = new UserVM()
+            /*var user_id = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            _messageService.CreateMessage(new Message()
             {
-                UserId = receiver,
-                Name = user.Name,
-                Avatar = user.Avatar,
-                UpdatedDate = DateTime.Now,
-            };
-            var info = JsonConvert.SerializeObject(vm);
-            SqlParameter[] @params = {
-                new SqlParameter("@user_id1", _sender),
-                new SqlParameter("@user_id2", _receiver),
-                new SqlParameter("@chat_id", SqlDbType.UniqueIdentifier) { Direction = ParameterDirection.Output }
-            };
-            var res = _dataContext.ChatUsers.FromSqlRaw($"exec FindPrivateChatId @user_id1, @user_id2, @chat_id OUTPUT", @params);
-            Guid chatId = Guid.NewGuid();
-            if (Guid.TryParse(@params[2].Value?.ToString(), out Guid x))
-            {
-                chatId = Guid.Parse(@params[2].Value.ToString());
-            }
-            else
-            {
-                _dataContext.Chats.Add(new Chat()
-                {
-                    ChatId = chatId,
-                    CreatedDate = DateTime.Now,
-                    UpdatedDate = DateTime.Now,
-                });
-                await _dataContext.SaveChangesAsync();
-            }
-            _dataContext.Messages.Add(new Message()
-            {
-                MessageId = Guid.NewGuid(),
-                MessageContent = message,
-                UserId = Guid.Parse(_receiver),
-                ChatId = chatId,
-                CreatedDate = DateTime.Now,
+                Text = message,
+                CreatedDate = DateTime.UtcNow,
+                UserId = user_id,
             });
-            await _dataContext.SaveChangesAsync();
-            await Clients.User(user.Email).SendAsync("ReceiveMessage", info, message);
+            await Clients.User(user_id).SendAsync("ReceiveMessage", );*/
         }
 
         public async Task SendGroup(string groupName, string username, string message)
