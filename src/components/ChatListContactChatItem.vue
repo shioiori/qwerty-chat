@@ -33,7 +33,6 @@ export default {
     methods: {
         async bindData(){
             try{
-                console.log(this.chat)
                 this.id = this.chat.id;
                 this.id = this.$store.getters.getUserId;
                 this.username = this.chat.name ? this.chat.name : (this.chat.members[0].id == this.id ? this.chat.members[1].name : this.chat.members[0].name);

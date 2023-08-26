@@ -1,5 +1,5 @@
 <template>
-    <div class="flex sm:items-center justify-between p-3 border-b-2 border-gray-200">
+    <div class="chat-header flex sm:items-center justify-between p-3 border-b-2 border-gray-200">
         <ChatContentHeaderInfo :chat_info="chat_info"/>
         <div class="flex items-center space-x-2">
             <button type="button"
@@ -46,4 +46,5 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+</style>

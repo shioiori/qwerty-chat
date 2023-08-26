@@ -28,13 +28,15 @@ function onConnectedNetwork(user_id){
     });
 }
 
-async function SendMessage(message){
-    console.log(message);
-    connection.invoke("SendGroup", message).catch(function (err) {
+async function SendAll(message){
+    connection.invoke("SendAll", message).catch(function (err) {
         return console.error(err.toString());
     });
-    return connection.on("ReceiveMessage", (obj) => {
-        return JSON.parse(obj);
+}
+
+async function SendMessage(message){
+    connection.invoke("SendGroup", message).catch(function (err) {
+        return console.error(err.toString());
     });
 }
 
@@ -43,4 +45,6 @@ export default {
     onDisconnectionAsync,
     onConnectedNetwork,
     SendMessage,
+    SendAll,
+    connection,
 }

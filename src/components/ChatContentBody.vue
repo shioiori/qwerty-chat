@@ -10,25 +10,31 @@ import ChatContentBodyMessage from './ChatContentBodyMessage.vue';
 export default {
     data() {
         return {
-            list_messages: [],
+            //current_list_messages: this.list_messages,
         }
     },
     props: {
-        chat_info: Object
+        chat_info: Object,
+        list_messages: Array,
     },
     components: {
         ChatContentBodyMessage,
     },
-    methods: {
-        async bindMessage() {
-            console.log(this.chat_info)
-            this.list_messages = await this.$store.getters.getListMessages(this.chat_info.chat_id);
-        }
+    mounted(){
+        // this.emitter.on("sendMessage", message => {
+        //     console.log(this.current_list_messages)
+        //     console.log(message);
+        //     this.current_list_messages.push(message);
+        // });
     },
-    mounted() {
-        this.bindMessage();
+    methods: {
     }
 }
 </script>
 
-<style></style>
+<style>
+.chat-container{
+    height: 77%;
+    overflow: auto;
+}
+</style>

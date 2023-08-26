@@ -77,8 +77,8 @@ export default {
         //     this.message = "";
         // },
         async sendMessageAsync(){
-            console.log(this.chat_info);
-            var res = await hub.SendMessage({
+            if (this.message.trim() == "") return;
+            await hub.SendMessage({
                 GroupName: this.chat_info.chat_id,
                 ChatId: this.chat_info.chat_id,
                 SenderId: this.$store.getters.getUserId,
@@ -86,8 +86,16 @@ export default {
                 IsFile: false,
                 Context: this.message,
             });
+            // await hub.SendAll(this.message);
             this.message = "";
-            console.log(res);
+            hub.connection.on("ReceiveMessage", (obj) => {
+                this.emitMessage(obj);
+                hub.connection.off("ReceiveMessage");
+            });
+        },
+        emitMessage(obj) {
+            console.log(11)
+            this.emitter.emit("sendMessage", JSON.parse(obj));
         }
     },
 }

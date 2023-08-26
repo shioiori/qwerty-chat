@@ -64,8 +64,9 @@ export default {
         },
         async getCurrentChatByUser(user_id, is_limited){
             var chat = await this.$store.getters.checkUserInChat([this.$store.getters.getUserId, user_id], is_limited);
-            if (chat == null){
-                chat = await this.$store.getters.createCurrentChat([this.$store.getters.getUserId, user_id], null, is_limited)
+            console.log(chat);
+            if (!chat){
+                chat = await this.$store.getters.createCurrentChat([this.$store.getters.getUserId, user_id], "", is_limited)
             }
             this.emitter.emit("getCurrentChat", {
                 chat_id: chat.id,

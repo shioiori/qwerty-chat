@@ -1,11 +1,9 @@
 <template>
-    
-    <div class="chat-message">
-         <div class="flex items-end justify-end p-2">
-            <div class="flex flex-col space-y-2 max-w-xs mx-2 order-1 items-end">
+    <div class="chat-message py-1">
+         <div class="flex items-end" :class="this.message.user.id == this.$store.getters.getUserId ? 'justify-start' : 'justify-end'">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2">
                 <ChatContentBodyMessageItem :message="this.message"/>
             </div>
-            <img :src="this.user.avatar" class="w-6 h-6 rounded-full order-2">
          </div>
       </div>
 </template>
@@ -15,7 +13,7 @@ import ChatContentBodyMessageItem from './ChatContentBodyMessageItem.vue';
 export default {
     data() {
         return {
-            user: {},
+            position: 'item-start',
         }
     },
     props: {
@@ -24,13 +22,7 @@ export default {
     components: {
         ChatContentBodyMessageItem,
     },
-    beforeMount(){
-        this.getUser();
-    },
-    methods: {
-        async getUser(){
-            this.user = this.$store.getters.getUser(this.message.id);
-        }
+    computed: {
     }
 }
 </script>

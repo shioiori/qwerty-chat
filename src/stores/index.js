@@ -23,7 +23,6 @@ const store = createStore({
                 }
                 let url = constants.BASE_URL + '/api/user/search?search_value=' + name;
                 var res = (await axios.get(url, config)).data;
-                console.log(res)
                 return res;
             }
             catch (err) {
@@ -39,7 +38,6 @@ const store = createStore({
                 }
                 let url = constants.BASE_URL + '/api/user' + (id ? '?id=' + id : '');
                 var res = (await axios.get(url, config)).data;
-                console.log(res)
                 return res;
             }
             catch (err) {
@@ -55,7 +53,6 @@ const store = createStore({
                 }
                 let url = constants.BASE_URL + '/api/chat/get-current-chat?id=' + id;
                 var res = (await axios.get(url, config)).data;
-                console.log(res)
                 return res;
             }
             catch (err) {
@@ -94,21 +91,14 @@ const store = createStore({
         },
         createCurrentChat: (state) => async (member_ids, chat_name, is_limited) => {
             try {
-                console.log(member_ids)
                 let config = {
                     headers: {
                         Authorization: "Bearer " + state.access_token
                     }
                 }
-                let url = constants.BASE_URL + '/api/chat/create-new-chat';
-                let body = {
-                    member_ids: member_ids,
-                    name: chat_name,
-                    limit: is_limited,
-                }
-                console.log(url)
+                let url = constants.BASE_URL + '/api/chat/create-new-chat?name=' + chat_name + '&is_limited=' + is_limited;
+                let body = member_ids;
                 var res = (await axios.post(url, body, config)).data;
-                console.log(res)
                 return res;
             }
             catch (err) {
@@ -122,12 +112,10 @@ const store = createStore({
                         Authorization: "Bearer " + state.access_token
                     }
                 }
-                let url = constants.BASE_URL + '/api/chat/check-user-in-chat';
-                let body = {
-                    members: member_ids,
-                    is_limited: is_limited,
-                }
-                var res = (await axios.get(url, body, config)).data;
+                let url = constants.BASE_URL + '/api/chat/check-user-in-chat?is_limited=' + is_limited;
+                let body = member_ids;
+                console.log(body)
+                var res = (await axios.post(url, body, config)).data;
                 return res;
             }
             catch (e) {
