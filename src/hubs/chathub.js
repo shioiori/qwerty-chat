@@ -1,10 +1,24 @@
 import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr'
 import constants from '@/constants';
 
+import mitt from 'mitt';
+
+const emitter = mitt();
+
 const connection = new HubConnectionBuilder()
                         .withUrl(constants.BASE_URL + '/chat-hub')
                         .configureLogging(LogLevel.Information)
                         .build();
+
+const addToGroup = connection.on("AddToGroup", (message) => {
+    console.log(message);
+});
+
+const receiveMessage = connection.on("ReceiveMessage", (message) => {
+    console.log("received message")
+    emitter.emit("sendMessage", JSON.parse(message));
+    //hub.connection.off("ReceiveMessage");
+});
 
 async function onConnectionAsync() {
     try {
@@ -40,11 +54,28 @@ async function SendMessage(message){
     });
 }
 
+async function AddToGroup(chat_id, user_id){
+    connection.invoke("AddToGroup", chat_id, user_id).catch(function (err) {
+        return console.error(err.toString());
+    });
+}
+
+async function RemoveFromGroup(chat_id, user_id){
+    connection.invoke("RemoveFromGroup", chat_id, user_id).catch(function (err) {
+        return console.error(err.toString());
+    });
+}
+
+
 export default {
     onConnectionAsync,
     onDisconnectionAsync,
     onConnectedNetwork,
     SendMessage,
     SendAll,
-    connection,
+    AddToGroup,
+    RemoveFromGroup,
+    addToGroup,
+    receiveMessage,
+    emitter
 }

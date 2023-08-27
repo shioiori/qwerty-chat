@@ -88,15 +88,15 @@ export default {
             });
             // await hub.SendAll(this.message);
             this.message = "";
-            hub.connection.on("ReceiveMessage", (obj) => {
-                this.emitMessage(obj);
-                hub.connection.off("ReceiveMessage");
-            });
+            // hub.connection.on("ReceiveMessage", (obj) => {
+            //     this.emitMessage(obj);
+            //     hub.connection.off("ReceiveMessage");
+            // });
         },
-        emitMessage(obj) {
-            console.log(11)
-            this.emitter.emit("sendMessage", JSON.parse(obj));
-        }
+        // emitMessage(obj) {
+        //     console.log(11)
+        //     this.emitter.emit("sendMessage", JSON.parse(obj));
+        // }
     },
 }
 </script>

@@ -1,6 +1,8 @@
 <template>
     <div class="chat-container">
-        <ChatContentBodyMessage v-for="(item, index) in list_messages" v-bind:message="item" v-bind:key="index" />
+        <div>
+            <ChatContentBodyMessage v-for="(item, index) in list_messages" v-bind:message="item" v-bind:key="index" />
+        </div>
     </div>
 </template>
 
@@ -36,5 +38,7 @@ export default {
 .chat-container{
     height: 77%;
     overflow: auto;
+    display: flex;
+    flex-direction: column-reverse;
 }
 </style>

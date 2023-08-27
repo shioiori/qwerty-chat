@@ -10,6 +10,7 @@
 import ChatContentHeader from './ChatContentHeader.vue';
 import ChatContentBody from './ChatContentBody.vue';
 import ChatContentMessageBar from './ChatContentMessageBar.vue';
+import hub from '../hubs/chathub.js';
 
 export default {
     data(){
@@ -29,8 +30,9 @@ export default {
             this.on_chatted = res.on_chatted;
             this.chat_info = res;
             this.bindMessage(this.chat_info.chat_id);
+            hub.AddToGroup(this.chat_info.chat_id, this.$store.getters.getUserId);
         });
-        this.emitter.on("sendMessage", message => {
+        hub.emitter.on("sendMessage", message => {
             this.list_messages.push(message);
         });
     },
