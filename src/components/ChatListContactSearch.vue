@@ -1,5 +1,5 @@
 <template>
-    <input type="text" placeholder="Type here" class="input input-bordered w-full" v-model="search_value" @keyup.enter="search"/>
+    <input type="text" placeholder="Type here" class="input input-bordered w-full" v-model="search_value" v-on:input="search"/>
 </template>
 
 <script>
@@ -11,7 +11,9 @@ export default {
     },
     methods: {
         search(){
-            this.$emit('search-connection', this.search_value);   
+            setTimeout(() => {
+                this.$emit('search-connection', this.search_value);   
+            }, 350);
         }
     }
 }

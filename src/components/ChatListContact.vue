@@ -47,6 +47,11 @@ export default {
     },
     methods: {
         async searchConnection(search_value){
+            if (search_value.trim() == ""){
+                this.user_connection = [];
+                this.getCurrentChatConnection();
+                return;
+            }
             this.user_connection = await this.$store.getters.getSearchConnection(search_value)
             this.chat_connection = [];
         },
@@ -80,7 +85,7 @@ export default {
             console.log(chat.members[0].id, id,chat.members[1].name);
             let username = chat.name ? chat.name : (chat.members[0].id == id ? chat.members[1].name : chat.members[0].name);
             return username;
-        }
+        },
     }
 }
 </script>

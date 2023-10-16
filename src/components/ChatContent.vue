@@ -1,5 +1,5 @@
 <template>
-    <div id="main-chat" class="col-span-5 border-r-2 border-gray-100" v-if="on_chatted">
+    <div id="main-chat" class="col-span-8 border-r-2 border-gray-100" v-if="on_chatted">
         <ChatContentHeader :chat_info="chat_info"/>
         <ChatContentBody :chat_info="chat_info" :list_messages="list_messages"/>
         <ChatContentMessageBar :chat_info="chat_info"/>

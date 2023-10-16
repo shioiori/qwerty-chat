@@ -29,6 +29,7 @@ export default {
         chat_info: Object
     },
     mounted(){
+        console.log(this.chat_info)
     },
     methods: {
     },

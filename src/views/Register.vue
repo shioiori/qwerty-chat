@@ -59,6 +59,18 @@ import router from '../routers/index.js';
 
 export default {
     name: 'Register',
+    created(){
+        // var now = new Date();
+        // var time = new Date();
+        // this.emitter.on("getDateStart", x => {
+        //     time = x.time;
+        //     console.log(time.)
+        // });
+        // var timeDiff = now - time;
+        // const seconds = Math.floor(timeDiff / 1000);
+        // //const minutes = Math.floor(seconds / 60);
+        // console.log(seconds);
+    },
     data(){
         return {
             username: '',
@@ -72,14 +84,6 @@ export default {
     methods: {
         async Register(){
             try{
-                console.log({
-                    username: this.username,
-                    password: this.password,
-                    name: this.name,
-                    email: this.email,
-                    phone: this.phone,
-                    avatar: this.avatar,
-                })
                 var res = (await axios.post(constants.BASE_URL + '/register', {
                     username: this.username,
                     password: this.password,
@@ -88,8 +92,7 @@ export default {
                     phone: this.phone,
                     avatar: this.avatar,
                 })).data;
-                console.log(res)
-                if (res.success){
+                if (res.success) {
                     router.push('/login');
                 }      
             }

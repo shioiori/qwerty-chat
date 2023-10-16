@@ -20,7 +20,8 @@ const router = createRouter({
       {
         path: '/register',
         name: 'register',
-        component: () => Register
+        component: () => Register,
+        params: (route) => ({ time: route.query.time })
       },
     ]
   })

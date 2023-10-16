@@ -24,10 +24,8 @@ export default {
             avatar: '',
         }
     },
-    beforeMount(){
-        this.bindData();
-    },  
     mounted(){
+        console.log(this.chat);
         this.bindData();
     },
     methods: {
